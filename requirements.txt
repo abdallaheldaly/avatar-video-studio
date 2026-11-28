@@ -1,0 +1,8 @@
+gradio>=4.0
+faster-whisper
+playwright
+numpy
+soundfile
+imageio-ffmpeg
+# optional, voice cloning (XTTS-v2 weights are non-commercial):
+# coqui-tts

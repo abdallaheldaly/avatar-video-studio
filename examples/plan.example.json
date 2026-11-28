@@ -1,0 +1,125 @@
+[
+ {
+  "start": 0.0,
+  "end": 9.0,
+  "text": "الإيرادات 500 ألف والمصروفات 300 ألف",
+  "mode": "scene",
+  "scene": {
+   "title": "الإيرادات مقابل المصروفات",
+   "unit": "ألف",
+   "type": "compare",
+   "items": [
+    {
+     "label": "الإيرادات",
+     "value": 500
+    },
+    {
+     "label": "المصروفات",
+     "value": 300
+    }
+   ],
+   "illustration_file": "ill_000.svg"
+  },
+  "warnings": []
+ },
+ {
+  "start": 9.0,
+  "end": 18.0,
+  "text": "الرواتب 50 في المية والإيجار 30 في المية والتسويق 20 في المية",
+  "mode": "scene",
+  "scene": {
+   "title": "توزيع المصروفات",
+   "unit": "%",
+   "type": "donut",
+   "items": [
+    {
+     "label": "الرواتب",
+     "value": 50
+    },
+    {
+     "label": "الإيجار",
+     "value": 30
+    },
+    {
+     "label": "التسويق",
+     "value": 20
+    }
+   ],
+   "illustration_file": "ill_001.svg"
+  },
+  "warnings": []
+ },
+ {
+  "start": 18.0,
+  "end": 27.0,
+  "text": "الإيرادات 500 ناقص المصروفات 300",
+  "mode": "scene",
+  "scene": {
+   "title": "صافي الربح",
+   "type": "equation",
+   "items": [
+    {
+     "text": "الإيرادات",
+     "value": 500,
+     "op": ""
+    },
+    {
+     "text": "المصروفات",
+     "value": 300,
+     "op": "−"
+    },
+    {
+     "text": "صافي الربح",
+     "value": 200.0,
+     "op": "=",
+     "result": true
+    }
+   ],
+   "illustration_file": "ill_002.svg"
+  },
+  "warnings": []
+ },
+ {
+  "start": 27.0,
+  "end": 36.0,
+  "text": "الخطوة الأولى نحدد الإيرادات والتانية المصروفات",
+  "mode": "scene",
+  "scene": {
+   "title": "الخطوات",
+   "type": "steps",
+   "items": [
+    "نحدد الإيرادات",
+    "نحسب المصروفات",
+    "نطرح"
+   ],
+   "illustration_file": "ill_003.svg"
+  },
+  "warnings": []
+ },
+ {
+  "start": 36.0,
+  "end": 45.0,
+  "text": "أهلاً بيكم في الحلقة",
+  "mode": "face",
+  "scene": null,
+  "warnings": []
+ },
+ {
+  "start": 45.0,
+  "end": 54.0,
+  "text": "الأرباح كبيرة جداً الحمد لله",
+  "mode": "scene",
+  "scene": {
+   "type": "bullets",
+   "title": "أرباح",
+   "items": [
+    "الأرباح كبيرة",
+    "الخسائر قليلة"
+   ]
+  },
+  "warnings": [
+   "2 number(s) rejected: not stated in the segment (or no matching evidence)",
+   "numeric scene dropped - downgraded to bullet points"
+  ]
+ }
+]

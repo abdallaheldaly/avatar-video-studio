@@ -1,0 +1,13 @@
+.git
+.venv
+.venv-musetalk
+.bin
+work
+data
+models_cache
+wheelhouse
+vendor/browsers
+third_party/MuseTalk/models
+__pycache__
+*.pyc
+.env

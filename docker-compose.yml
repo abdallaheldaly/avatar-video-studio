@@ -1,0 +1,39 @@
+# docker compose up --build          then open http://localhost:7860
+# The first start downloads the MuseTalk weights (~5 GB) and the language model (a few GB) into Docker volumes.
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+  ollama-pull:                       # one-shot: downloads the language model
+    image: ollama/ollama:latest
+    depends_on: [ollama]
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["ollama", "pull", "${LLM_MODEL:-qwen3:8b}"]
+    restart: "no"
+
+  studio:
+    build: .
+    ports:
+      - "7860:7860"
+    depends_on: [ollama]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      LLM_MODEL: ${LLM_MODEL:-qwen3:8b}
+      FACE_BACKEND: ${FACE_BACKEND:-musetalk}
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+      SCENE_WORKERS: ${SCENE_WORKERS:-2}
+    volumes:
+      - ./work:/app/work                       # results (final.mp4 etc.)
+      - ./data:/data                           # put your photo/audio here for headless runs
+      - musetalk-models:/app/third_party/MuseTalk/models
+      - hf-cache:/root/.cache/huggingface      # Whisper models
+    restart: unless-stopped
+
+volumes:
+  ollama:
+  musetalk-models:
+  hf-cache:

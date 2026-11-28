@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' file:; style-src 'unsafe-inline'; font-src file:; img-src data:; connect-src 'none'">
+<style>
+@font-face{font-family:"CairoLocal";font-weight:500;src:url("vendor/fonts/cairo-arabic-500-normal.woff2");unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC}
+@font-face{font-family:"CairoLocal";font-weight:500;src:url("vendor/fonts/cairo-latin-500-normal.woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC}
+@font-face{font-family:"CairoLocal";font-weight:800;src:url("vendor/fonts/cairo-arabic-800-normal.woff2");unicode-range:U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC}
+@font-face{font-family:"CairoLocal";font-weight:800;src:url("vendor/fonts/cairo-latin-800-normal.woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC}
+html,body{margin:0;width:1280px;height:720px;overflow:hidden;background:#0b1220;color:#fff;font-family:"CairoLocal","Noto Naskh Arabic",Tahoma,sans-serif}
+canvas{position:absolute;inset:0}
+#ui{position:absolute;inset:0}
+#main{position:absolute;top:34px;right:56px;width:760px;display:flex;flex-direction:column;align-items:stretch}
+#main.full{right:90px;width:1100px;align-items:center}
+h1{font-size:46px;line-height:1.35;margin:0 0 6px;font-weight:800;opacity:0;animation:in .8s .1s forwards}
+.sub{font-size:26px;color:#9fb3d1;margin:0 0 14px;opacity:0;animation:in .8s .3s forwards}
+.full h1{text-align:center;font-size:60px}.full .sub{text-align:center}
+.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:12px 26px;margin:8px 0;font-size:32px;line-height:1.4;opacity:0;animation:card .8s forwards;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.card b{color:#5eead4;margin-left:14px}
+.eq{display:flex;align-items:center;gap:18px;font-size:38px}
+.eq .op{width:44px;text-align:center;color:#fbbf24;font-weight:800}
+.eq .nm{flex:1}.eq .v{font-weight:800;min-width:150px;text-align:left;direction:ltr;color:#5eead4}
+.card.res{background:rgba(94,234,212,.2);border-color:#5eead4}
+.lbl,.val{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center}
+.lbl{font-size:26px;text-shadow:0 2px 6px #000}.val{font-size:30px;font-weight:800;color:#5eead4;text-shadow:0 2px 6px #000}
+#ill{position:absolute;left:44px;top:96px;width:320px;height:320px;border-radius:24px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);padding:14px;box-sizing:border-box;opacity:0;animation:ill 1s .5s forwards,float 4s 1.5s ease-in-out infinite;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+#ill img{width:100%;height:100%;object-fit:contain}
+#ill.big{left:360px;top:70px;width:560px;height:520px}
+#cap{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:34px;opacity:0;animation:in .8s 1s forwards}
+@keyframes in{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes card{from{opacity:0;transform:perspective(900px) translateZ(-260px) rotateX(35deg)}to{opacity:1;transform:perspective(900px) none}}
+@keyframes ill{from{opacity:0;transform:perspective(900px) rotateY(50deg) scale(.8)}to{opacity:1;transform:perspective(900px) rotateY(14deg)}}
+@keyframes float{0%,100%{transform:perspective(900px) rotateY(14deg) translateY(0)}50%{transform:perspective(900px) rotateY(10deg) translateY(-10px)}}
+</style></head><body>
+<div id="ui"><div id="main"></div></div>
+<script src="vendor/three.min.js"></script>
+<script>
+const S = window.SCENE || {type:"title", title:"Title"};
+const T = S.type, items = S.items || [], hasIll = !!S.illustration_uri;
+const ui = document.getElementById("ui"), main = document.getElementById("main");
+const COL = [0x38bdf8, 0x34d399, 0xfbbf24, 0xf472b6, 0xa78bfa, 0xfb923c, 0x2dd4bf];
+const fmt = n => Number(n).toLocaleString("en-US", {maximumFractionDigits: 2});
+const esc = s => String(s == null ? "" : s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(50, 1280/720, .1, 100);
+cam.position.set(0, 3, 11); cam.lookAt(0, 2, 0);
+const r = new THREE.WebGLRenderer({antialias:true}); r.setSize(1280, 720); r.setClearColor(0x0b1220, 1); document.body.prepend(r.domElement);
+scene.add(new THREE.AmbientLight(0xffffff, .5));
+const dl = new THREE.DirectionalLight(0xffffff, .75); dl.position.set(5, 10, 7); scene.add(dl);
+
+// 3D background
+const ico = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 1), new THREE.MeshBasicMaterial({color:0x1e3a8a, wireframe:true, transparent:true, opacity:.3}));
+ico.position.set(0, 2, -9); scene.add(ico);
+const pg = new THREE.BufferGeometry(), pa = [];
+for (let i = 0; i < 300; i++) pa.push((Math.random()-.5)*34, (Math.random()-.5)*18, -Math.random()*16);
+pg.setAttribute("position", new THREE.Float32BufferAttribute(pa, 3));
+scene.add(new THREE.Points(pg, new THREE.PointsMaterial({color:0x5eead4, size:.05})));
+
+// text
+const WEBGL = ["bars", "donut", "compare"].includes(T);
+main.className = (hasIll || WEBGL) && T !== "title" ? "" : "full";
+if (S.title) main.insertAdjacentHTML("beforeend", `<h1>${esc(S.title)}</h1>`);
+if (S.subtitle) main.insertAdjacentHTML("beforeend", `<p class="sub">${esc(S.subtitle)}</p>`);
+if (T === "title") { main.style.top = "250px"; }
+const delay = i => `style="animation-delay:${.7 + i*.9}s"`;
+if (T === "steps") items.forEach((t, i) => main.insertAdjacentHTML("beforeend", `<div class="card" ${delay(i)}><b>${i+1}</b>${esc(t)}</div>`));
+if (T === "bullets") items.forEach((t, i) => main.insertAdjacentHTML("beforeend", `<div class="card" ${delay(i)}><b>●</b>${esc(t)}</div>`));
+if (T === "equation") items.forEach((it, i) => main.insertAdjacentHTML("beforeend",
+  `<div class="card eq ${it.result ? "res" : ""}" ${delay(i)}><span class="op">${esc(it.op || "")}</span><span class="nm">${esc(it.text)}</span><span class="v">${fmt(it.value)}${S.unit ? " " + esc(S.unit) : ""}</span></div>`));
+if (hasIll) ui.insertAdjacentHTML("beforeend", `<div id="ill" class="${T === "image" ? "big" : ""}"><img src="${S.illustration_uri}"></div>`);
+if (T === "image" && S.caption) ui.insertAdjacentHTML("beforeend", `<div id="cap">${esc(S.caption)}</div>`);
+
+// 3D objects
+const root = new THREE.Group(); scene.add(root);
+if (WEBGL) { root.position.x = hasIll ? 2.6 : 0.4; root.position.y = T === "compare" ? 0.6 : -0.5; root.scale.setScalar(T === "compare" ? .8 : hasIll ? .82 : .95); }
+const tags = [];
+function tag(cls, text) { const d = document.createElement("div"); d.className = cls; d.textContent = text; ui.appendChild(d); return d; }
+function place(el, v3) { const p = v3.clone().applyMatrix4(root.matrixWorld).project(cam); el.style.left = (p.x*.5+.5)*1280 + "px"; el.style.top = (-p.y*.5+.5)*720 + "px"; }
+const ease = k => 1 - Math.pow(1 - Math.min(Math.max(k, 0), 1), 3);
+const anim = [];
+
+if (T === "bars") {
+  const mx = Math.max(...items.map(x => Math.abs(x.value)), 1);
+  items.forEach((it, i) => {
+    const h = Math.max(Math.abs(it.value)/mx*4.4, .06), x = ((items.length-1)/2 - i) * 2.3;   // first item on the right (RTL)
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1, 1.4), new THREE.MeshStandardMaterial({color: it.value < 0 ? 0xf87171 : COL[i % COL.length]}));
+    m.position.x = x; root.add(m);
+    const l = tag("lbl", it.label), v = tag("val", ""); tags.push(l, v);
+    anim.push(t => { const e = ease((t - .6 - i*.25)/1.2), hh = h*e + .001; m.scale.y = hh; m.position.y = hh/2;
+      place(l, new THREE.Vector3(x, -.45, .7)); place(v, new THREE.Vector3(x, hh + .35, 0)); v.textContent = fmt(it.value*e) + (S.unit ? " " + S.unit : ""); });
+  });
+}
+if (T === "donut") {
+  const tot = items.reduce((s, x) => s + Math.abs(x.value), 0) || 1; let a = Math.PI/2;
+  root.rotation.x = -0.85; root.position.y = 0.6;
+  items.forEach((it, i) => {
+    const ang = Math.abs(it.value)/tot*Math.PI*2, sh = new THREE.Shape();
+    sh.moveTo(0, 0); sh.absarc(0, 0, 3, a, a + ang, false); sh.lineTo(0, 0);
+    const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, {depth:.9, bevelEnabled:false}), new THREE.MeshStandardMaterial({color: COL[i % COL.length]}));
+    root.add(m); const mid = a + ang/2; a += ang;
+    const l = tag("lbl", `${it.label}`), v = tag("val", `${Math.round(Math.abs(it.value)/tot*100)}%`); tags.push(l, v);
+    anim.push(t => { const e = ease((t - .5 - i*.3)/.9), pop = .3*e; m.position.set(Math.cos(mid)*pop, Math.sin(mid)*pop, 0); m.scale.setScalar(.2 + .8*e);
+      place(l, new THREE.Vector3(Math.cos(mid)*4.1, Math.sin(mid)*4.1, .5)); place(v, new THREE.Vector3(Math.cos(mid)*2.0, Math.sin(mid)*2.0, 1.0)); l.style.opacity = v.style.opacity = e; v.style.color = "#fff"; });
+  });
+}
+if (T === "compare" && items.length >= 2) {
+  const v0 = Math.abs(items[0].value), v1 = Math.abs(items[1].value), mx = Math.max(v0, v1, 1);
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(.15, .25, 4.6, 16), new THREE.MeshStandardMaterial({color:0x94a3b8})); post.position.y = 0; root.add(post);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, .3, 32), new THREE.MeshStandardMaterial({color:0x64748b})); base.position.y = -2.3; root.add(base);
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(6.4, .18, .25), new THREE.MeshStandardMaterial({color:0xfbbf24})); beam.position.y = 2.3; root.add(beam);
+  const pans = [0, 1].map(i => { const g = new THREE.Group(), p = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, .12, 32), new THREE.MeshStandardMaterial({color: COL[i]})),
+    s = new THREE.Mesh(new THREE.BoxGeometry(.05, 1.8, .05), new THREE.MeshStandardMaterial({color:0xcbd5e1})); s.position.y = .9; g.add(p, s); root.add(g); return g; });
+  const L = 3, lab = items.slice(0, 2).map(it => [tag("lbl", it.label), tag("val", "")]); lab.forEach(a => tags.push(...a));
+  anim.push(t => {
+    const e = ease((t - .8)/1.6), th = (v1 - v0)/mx*.38*e;      // items[0] on the right, items[1] on the left; the heavier side goes down
+    beam.rotation.z = th;
+    [1, 0].forEach(i => { const s = i === 0 ? 1 : -1, ex = s*L*Math.cos(th), ey = 2.3 + s*L*Math.sin(th);
+      pans[i].position.set(ex, ey - 1.8, 0);
+      place(lab[i][1], new THREE.Vector3(ex, ey - 1.0, .3)); place(lab[i][0], new THREE.Vector3(ex, ey - 2.6, .3));
+      lab[i][1].textContent = fmt(items[i].value*Math.min(e*1.2, 1)) + (S.unit ? " " + S.unit : ""); });
+  });
+}
+
+function frame(t) {
+  ico.rotation.set(t*.15, t*.2, 0);
+  root.updateMatrixWorld(true);
+  if (T !== "donut") root.rotation.y = Math.sin(t*.5)*.18; else root.rotation.z = Math.sin(t*.4)*.12;
+  root.updateMatrixWorld(true);
+  anim.forEach(f => f(t));
+  r.render(scene, cam);
+}
+// frame-by-frame mode (export): every frame is set to an exact time
+window.__setT = t => { document.getAnimations().forEach(a => { a.pause(); a.currentTime = t*1000; }); frame(t); };
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode ? i.decode().catch(() => {}) : 0)]).then(() => { window.__ready = true; });
+if (!window.__MANUAL) { const t0 = performance.now(); (function loop() { frame((performance.now() - t0)/1000); requestAnimationFrame(loop); })(); }
+</script></body></html>

@@ -1,0 +1,12 @@
+.venv/
+.venv-musetalk/
+.bin/
+work/
+.env
+.mt_requirements.txt
+third_party/MuseTalk/models/
+__pycache__/
+wheelhouse/
+models_cache/
+vendor/browsers/
+eval/report.json

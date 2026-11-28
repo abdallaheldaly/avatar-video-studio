@@ -1,0 +1,42 @@
+{
+ "segment_text": "الأرباح كبيرة جداً الحمد لله",
+ "raw_model_output": {
+  "kind": "comparison",
+  "title": "أرباح",
+  "items": [
+   {
+    "label": "الأرباح",
+    "value": 777,
+    "op": "",
+    "evidence": "الأرباح 777"
+   },
+   {
+    "label": "الخسائر",
+    "value": 12,
+    "op": "",
+    "evidence": "الخسائر 12"
+   }
+  ],
+  "result_label": "",
+  "steps": [
+   "الأرباح كبيرة",
+   "الخسائر قليلة"
+  ],
+  "term": "",
+  "definition": "",
+  "unit": "",
+  "icon_keywords": []
+ },
+ "verified_scene": {
+  "type": "bullets",
+  "title": "أرباح",
+  "items": [
+   "الأرباح كبيرة",
+   "الخسائر قليلة"
+  ]
+ },
+ "verifier_notes": [
+  "2 number(s) rejected: not stated in the segment (or no matching evidence)",
+  "numeric scene dropped - downgraded to bullet points"
+ ]
+}
